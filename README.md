@@ -25,7 +25,7 @@ It provides quick access to system stats like CPU usage, memory, disk, battery, 
 
 ```bash
 git clone https://github.com/d1gallar/sysinfo.git
-cd sysinfo
+cd sysinfo/sysinfo
 ```
 
 ### 2. Make setup executable
