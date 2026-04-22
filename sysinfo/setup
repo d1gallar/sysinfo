@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+
+# Sysinfo Installer Script
+
+set -e
+
+# Colors
+G='\033[0;32m'
+B='\033[0;34m'
+Y='\033[1;33m'
+R='\033[0;31m'
+NC='\033[0m'
+
+# Config
+INSTALL_DIR="$HOME/.local/bin"
+BIN_NAME="sysinfo"
+SCRIPT_PATH="$INSTALL_DIR/$BIN_NAME"
+
+# Detect script directory (works with curl | bash)
+SCRIPT_SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SCRIPT_SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SCRIPT_SOURCE")" && pwd)"
+  SCRIPT_SOURCE="$(readlink "$SCRIPT_SOURCE")"
+  [[ $SCRIPT_SOURCE != /* ]] && SCRIPT_SOURCE="$DIR/$SCRIPT_SOURCE"
+done
+REPO_DIR="$(cd -P "$(dirname "$SCRIPT_SOURCE")" && pwd)"
+
+header() {
+    echo -e "${B}───────────────────────────────${NC}"
+    echo -e "${B}        Sys Info Installer      ${NC}"
+    echo -e "${B}───────────────────────────────${NC}"
+    echo
+}
+
+ensure_path() {
+    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+        echo -e "${Y}Adding $INSTALL_DIR to PATH...${NC}"
+
+        # Add to .zshrc or .bashrc
+        if [[ "$SHELL" == *"zsh"* ]]; then
+            echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >> "$HOME/.zshrc"
+            echo -e "${G}Added to ~/.zshrc${NC}"
+        else
+            echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >> "$HOME/.bashrc"
+            echo -e "${G}Added to ~/.bashrc${NC}"
+        fi
+
+        echo -e "${Y}Restart your terminal or run: source ~/.zshrc${NC}"
+    fi
+}
+
+install() {
+    header
+    echo -e "${Y}Installing sysinfo...${NC}"
+    echo
+
+    mkdir -p "$INSTALL_DIR"
+
+    # If running from cloned repo
+    if [[ -f "$REPO_DIR/sysinfo" ]]; then
+        cp "$REPO_DIR/sysinfo" "$SCRIPT_PATH"
+    else
+        # If running via curl
+        echo -e "${Y}Downloading sysinfo...${NC}"
+        curl -fsSL https://raw.githubusercontent.com/d1gallar/sysinfo/main/sysinfo/sysinfo -o "$SCRIPT_PATH"
+    fi
+
+    chmod +x "$SCRIPT_PATH"
+
+    ensure_path
+
+    echo
+    echo -e "${G}✓ Installed successfully!${NC}"
+    echo -e "${B}Run:${NC} sysinfo"
+    echo
+}
+
+uninstall() {
+    header
+    echo -e "${Y}Uninstalling sysinfo...${NC}"
+
+    if [[ -f "$SCRIPT_PATH" ]]; then
+        rm -f "$SCRIPT_PATH"
+        echo -e "${G}✓ Removed${NC}"
+    else
+        echo -e "${R}Not installed${NC}"
+    fi
+
+    echo
+}
+
+status() {
+    header
+    
+    echo -e "Checking if sysinfo is installed..."
+    echo
+    if [[ -f "$SCRIPT_PATH" ]]; then
+        echo -e "${G}✓ Installed${NC}"
+        echo -e "${B}Location:${NC} $SCRIPT_PATH"
+    else
+        echo -e "${R}✗ Not installed${NC}"
+    fi
+
+    echo
+}
+
+case "${1:-}" in
+    install) install ;;
+    uninstall) uninstall ;;
+    status) status ;;
+    *)
+        header
+        echo "Usage:"
+        echo "  setup install"
+        echo "  setup uninstall"
+        echo "  setup status"
+        echo
+        ;;
+esac
