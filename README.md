@@ -75,14 +75,15 @@ Shows a system overview dashboard.
 
 Here are the steps to uninstall:
 
+If cloned repository still exists locally, run:
 ```bash
 ./setup uninstall
  ```
-or manually
-
+If not, manually run:
 ```
 rm ~/.local/bin/sysinfo
 ```
+
 ## 💻 Installer
 
 ### Command Usage
